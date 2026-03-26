@@ -19,13 +19,16 @@
 
 **Depends on:** Nothing (first phase)
 
-**Requirements:** (Infrastructure - no v1 requirements)
+**Requirements:** SET-01, SET-02, SET-03, SET-04, SET-05, SET-06 (Settings & Configuration)
 
 **Success Criteria** (what must be TRUE):
 1. User can launch the desktop application and see a window
 2. User can see an input panel for pasting algorithm descriptions
 3. User can see an output panel for displaying results
 4. Application runs without crashes on primary target platform
+5. User can configure API keys for AI providers (NVIDIA, OpenAI, Anthropic)
+6. User can select which AI provider to use
+7. API keys are stored securely
 
 **Plans**: TBD
 
@@ -38,18 +41,20 @@
 
 **Depends on:** Phase 1
 
-**Requirements:** INPT-01, INPT-02, INPT-03, INPT-04, STEP-01, STEP-02, STEP-03, STEP-04, STEP-05, STEP-06
+**Requirements:** INPT-01, INPT-02, INPT-03, INPT-04, INPT-05, INPT-06, STEP-01, STEP-02, STEP-03, STEP-04, STEP-05, STEP-06
 
 **Success Criteria** (what must be TRUE):
 1. User can paste a mathematical algorithm description and see it parsed
 2. System handles LaTeX notation (e.g., \sum, \frac, subscripts) in input
 3. System handles plain text mathematical descriptions without LaTeX
-4. Algorithm is presented as numbered, structured steps
-5. Each step includes a plain language explanation
-6. Variables show their types and initial values
-7. Control flow (loops, conditionals) is clearly identified
-8. System signals confidence level for ambiguous sections
-9. User can review and confirm step interpretation before code generation
+4. User can import PDF files containing algorithm descriptions
+5. User can import common text file formats (.txt, .md)
+6. Algorithm is presented as numbered, structured steps
+7. Each step includes a plain language explanation
+8. Variables show their types and initial values
+9. Control flow (loops, conditionals) is clearly identified
+10. System signals confidence level for ambiguous sections
+11. User can review and confirm step interpretation before code generation
 
 **Plans**: TBD
 
@@ -107,9 +112,11 @@
 ## Notes
 
 - Phases derived from requirements (not imposed)
-- Coarse granularity applied (4 phases for 22 requirements)
+- Coarse granularity applied (4 phases for 28 requirements)
 - Dependencies respect natural flow: Foundation → Input → Code → Explain
 - UI hint added to Phase 1 (desktop shell with panels)
+- Added PDF/text file input support (Phase 2)
+- Added API key configuration (Phase 1)
 
 ---
 

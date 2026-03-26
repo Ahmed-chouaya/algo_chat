@@ -17,10 +17,12 @@ Enable mathematicians to reliably convert mathematical algorithm descriptions fr
 ### Active
 
 - [ ] User can input a mathematical algorithm description (paper excerpt or natural language)
+- [ ] User can import PDF files and text documents
 - [ ] System extracts and presents the algorithm as clear, structured steps
 - [ ] System transforms structured steps into working executable implementation
 - [ ] User can run the implementation and obtain results
 - [ ] System explains what is happening when the user needs understanding
+- [ ] User can configure API keys for AI providers (NVIDIA, OpenAI, Anthropic)
 
 ### Out of Scope
 

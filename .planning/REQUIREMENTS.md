@@ -13,6 +13,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INPT-02**: System handles LaTeX mathematical notation in input
 - [ ] **INPT-03**: System handles plain text mathematical descriptions (without LaTeX)
 - [ ] **INPT-04**: System extracts mathematical expressions from mixed content
+- [ ] **INPT-05**: User can import PDF files containing algorithm descriptions
+- [ ] **INPT-06**: User can import common text file formats (.txt, .md)
 
 ### Structured Steps
 
@@ -43,6 +45,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **EXPL-01**: System provides plain language summary of what the algorithm does
 - [ ] **EXPL-02**: System explains each major step in accessible terms
 - [ ] **EXPL-03**: System explains what the generated code does (not just what the algorithm does)
+
+### Settings & Configuration
+
+- [ ] **SET-01**: User can configure API keys for AI providers
+- [ ] **SET-02**: User can add NVIDIA API key for local AI processing
+- [ ] **SET-03**: User can add OpenAI API key as alternative
+- [ ] **SET-04**: User can add Anthropic API key as alternative
+- [ ] **SET-05**: User can view and manage saved API keys
+- [ ] **SET-06**: User can select which AI provider to use
 
 ## v2 Requirements
 
@@ -93,6 +104,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INPT-02 | Phase 2 | Pending |
 | INPT-03 | Phase 2 | Pending |
 | INPT-04 | Phase 2 | Pending |
+| INPT-05 | Phase 2 | Pending |
+| INPT-06 | Phase 2 | Pending |
 | STEP-01 | Phase 2 | Pending |
 | STEP-02 | Phase 2 | Pending |
 | STEP-03 | Phase 2 | Pending |
@@ -111,10 +124,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXPL-01 | Phase 4 | Pending |
 | EXPL-02 | Phase 4 | Pending |
 | EXPL-03 | Phase 4 | Pending |
+| SET-01 | Phase 1 | Pending |
+| SET-02 | Phase 1 | Pending |
+| SET-03 | Phase 1 | Pending |
+| SET-04 | Phase 1 | Pending |
+| SET-05 | Phase 1 | Pending |
+| SET-06 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
+- v1 requirements: 28 total
+- Mapped to phases: 28
 - Unmapped: 0 ✓
 
 ---
