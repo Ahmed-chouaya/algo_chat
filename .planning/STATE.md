@@ -19,11 +19,11 @@
 | Field | Value |
 |-------|-------|
 | Phase | 1 |
-| Plan | 01 of 03 in Phase 1 (Desktop Foundation) |
-| Status | Plan 01-01 complete |
-| Progress | ████░░░░░░ 33% |
+| Plan | 02 of 03 in Phase 1 (Desktop Foundation) |
+| Status | Plan 01-02 complete |
+| Progress | ██████░░░░ 66% |
 
-**Activity:** Plan 01-01 complete — Tauri + Svelte project initialized
+**Activity:** Plan 01-02 complete — Split-view UI built with design system
 
 ---
 
@@ -56,7 +56,9 @@
 ### Todos
 
 - [x] Plan Phase 1: Desktop Foundation
-- [x] Execute Phase 1: Desktop Foundation (Plan 01-01 complete)
+- [x] Execute Plan 01-01: Tauri + Svelte project initialization
+- [x] Execute Plan 01-02: Split-view UI with design system
+- [ ] Execute Plan 01-03: Settings modal and API key storage
 - [ ] Validate Phase 1 completion
 - [ ] Transition to Phase 2
 
@@ -68,9 +70,9 @@ None yet.
 
 ## Session Continuity
 
-**Current session:** Phase 1 plan 01-01 executed — desktop shell project initialized
+**Current session:** Phase 1 plan 01-02 executed — split-view UI with design system built
 
-**Next action:** Execute plan 01-02 (UI components)
+**Next action:** Execute plan 01-03 (settings modal, API key storage)
 
 ---
 
