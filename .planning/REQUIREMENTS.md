@@ -113,8 +113,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXPL-03 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 26 total
-- Mapped to phases: 26
+- v1 requirements: 22 total
+- Mapped to phases: 22
 - Unmapped: 0 ✓
 
 ---
