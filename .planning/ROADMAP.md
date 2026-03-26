@@ -30,7 +30,7 @@
 6. User can select which AI provider to use
 7. API keys are stored securely
 
-**Plans**: TBD
+**Plans**: 3 plans (01-01, 01-02, 01-03)
 
 **UI hint**: yes
 
