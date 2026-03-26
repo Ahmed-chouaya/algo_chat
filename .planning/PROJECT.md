@@ -12,7 +12,7 @@ Enable mathematicians to reliably convert mathematical algorithm descriptions fr
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] User can configure API keys for AI providers (NVIDIA, OpenAI, Anthropic) — *Validated in Phase 1: Desktop Foundation*
 
 ### Active
 
@@ -22,7 +22,6 @@ Enable mathematicians to reliably convert mathematical algorithm descriptions fr
 - [ ] System transforms structured steps into working executable implementation
 - [ ] User can run the implementation and obtain results
 - [ ] System explains what is happening when the user needs understanding
-- [ ] User can configure API keys for AI providers (NVIDIA, OpenAI, Anthropic)
 
 ### Out of Scope
 
@@ -73,4 +72,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after initialization*
+*Last updated: 2026-03-26 after Phase 1 (Desktop Foundation) completion*
