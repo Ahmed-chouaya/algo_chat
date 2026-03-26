@@ -1,0 +1,10 @@
+{
+  "permission": {
+    "read": {
+      "/home/milgraph/Projects/algo/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "/home/milgraph/Projects/algo/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
