@@ -48,12 +48,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Settings & Configuration
 
-- [ ] **SET-01**: User can configure API keys for AI providers
-- [ ] **SET-02**: User can add NVIDIA API key for local AI processing
-- [ ] **SET-03**: User can add OpenAI API key as alternative
-- [ ] **SET-04**: User can add Anthropic API key as alternative
-- [ ] **SET-05**: User can view and manage saved API keys
-- [ ] **SET-06**: User can select which AI provider to use
+- [x] **SET-01**: User can configure API keys for AI providers
+- [x] **SET-02**: User can add NVIDIA API key for local AI processing
+- [x] **SET-03**: User can add OpenAI API key as alternative
+- [x] **SET-04**: User can add Anthropic API key as alternative
+- [x] **SET-05**: User can view and manage saved API keys
+- [x] **SET-06**: User can select which AI provider to use
 
 ## v2 Requirements
 
@@ -124,12 +124,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXPL-01 | Phase 4 | Pending |
 | EXPL-02 | Phase 4 | Pending |
 | EXPL-03 | Phase 4 | Pending |
-| SET-01 | Phase 1 | Pending |
-| SET-02 | Phase 1 | Pending |
-| SET-03 | Phase 1 | Pending |
-| SET-04 | Phase 1 | Pending |
-| SET-05 | Phase 1 | Pending |
-| SET-06 | Phase 1 | Pending |
+| SET-01 | Phase 1 | Complete |
+| SET-02 | Phase 1 | Complete |
+| SET-03 | Phase 1 | Complete |
+| SET-04 | Phase 1 | Complete |
+| SET-05 | Phase 1 | Complete |
+| SET-06 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 28 total
