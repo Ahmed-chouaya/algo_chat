@@ -1,8 +1,15 @@
 <script lang="ts">
-  let selectedProvider = $state('OpenAI');
+  import { selectedProvider, providerLabels, providers, type Provider } from '$lib/stores/settings';
+  import SettingsModal from './SettingsModal.svelte';
+  
   let showSettings = $state(false);
   
-  const providers = ['NVIDIA', 'OpenAI', 'Anthropic'];
+  const providerList = providers;
+  
+  function handleProviderChange(e: Event) {
+    const target = e.target as HTMLSelectElement;
+    selectedProvider.set(target.value as Provider);
+  }
 </script>
 
 <header class="header">
@@ -18,9 +25,9 @@
   
   <div class="header-right">
     <div class="provider-selector">
-      <select bind:value={selectedProvider}>
-        {#each providers as provider}
-          <option value={provider}>{provider}</option>
+      <select onchange={handleProviderChange} value={$selectedProvider}>
+        {#each providerList as provider}
+          <option value={provider}>{providerLabels[provider]}</option>
         {/each}
       </select>
     </div>
@@ -33,6 +40,8 @@
     </button>
   </div>
 </header>
+
+<SettingsModal open={showSettings} onclose={() => showSettings = false} />
 
 <style>
   .header {
