@@ -6,6 +6,19 @@
 import { writable } from 'svelte/store';
 import type { AlgorithmStep, CodeGenerationResult, ExecutionResult } from '$lib/processing';
 
+/** Explanation state for an algorithm */
+export interface StepExplanation {
+  stepNumber: number;
+  explanation: string;
+}
+
+export interface ExplanationState {
+  summary: string;
+  stepExplanations: StepExplanation[];
+  codeExplanation: string;
+  generatedAt: Date;
+}
+
 export interface AlgorithmState {
   steps: AlgorithmStep[];
   confirmed: boolean;
@@ -14,6 +27,7 @@ export interface AlgorithmState {
   codeGenerationResult: CodeGenerationResult | null;
   executionResult: ExecutionResult | null;
   isExecuting: boolean;
+  explanation: ExplanationState | null;
 }
 
 const initialState: AlgorithmState = {
@@ -23,7 +37,8 @@ const initialState: AlgorithmState = {
   generatedCode: null,
   codeGenerationResult: null,
   executionResult: null,
-  isExecuting: false
+  isExecuting: false,
+  explanation: null
 };
 
 function createAlgorithmStore() {
@@ -57,7 +72,11 @@ function createAlgorithmStore() {
     
     /** Set executing state */
     setExecuting: (isExecuting: boolean) =>
-      update(state => ({ ...state, isExecuting }))
+      update(state => ({ ...state, isExecuting })),
+    
+    /** Set explanation state */
+    setExplanation: (explanation: ExplanationState | null) =>
+      update(state => ({ ...state, explanation }))
   };
 }
 
