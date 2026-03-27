@@ -12,6 +12,14 @@ export interface StepExplanation {
   explanation: string;
 }
 
+/** Chat message for follow-up questions */
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
 export interface ExplanationState {
   summary: string;
   stepExplanations: StepExplanation[];
@@ -28,6 +36,8 @@ export interface AlgorithmState {
   executionResult: ExecutionResult | null;
   isExecuting: boolean;
   explanation: ExplanationState | null;
+  chatMessages: ChatMessage[];
+  isChatLoading: boolean;
 }
 
 const initialState: AlgorithmState = {
@@ -38,7 +48,9 @@ const initialState: AlgorithmState = {
   codeGenerationResult: null,
   executionResult: null,
   isExecuting: false,
-  explanation: null
+  explanation: null,
+  chatMessages: [],
+  isChatLoading: false
 };
 
 function createAlgorithmStore() {
@@ -76,7 +88,19 @@ function createAlgorithmStore() {
     
     /** Set explanation state */
     setExplanation: (explanation: ExplanationState | null) =>
-      update(state => ({ ...state, explanation }))
+      update(state => ({ ...state, explanation })),
+    
+    /** Add a chat message to history */
+    addChatMessage: (message: ChatMessage) =>
+      update(state => ({ ...state, chatMessages: [...state.chatMessages, message] })),
+    
+    /** Set chat loading state */
+    setChatLoading: (isLoading: boolean) =>
+      update(state => ({ ...state, isChatLoading: isLoading })),
+    
+    /** Clear chat history */
+    clearChat: () =>
+      update(state => ({ ...state, chatMessages: [], isChatLoading: false }))
   };
 }
 
