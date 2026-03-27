@@ -56,7 +56,12 @@
 10. System signals confidence level for ambiguous sections
 11. User can review and confirm step interpretation before code generation
 
-**Plans**: TBD
+**Plans**: 3 plans (02-01, 02-02, 02-03)
+
+**Plan list:**
+- [ ] 02-01-PLAN.md — Input processing layer (text, LaTeX, mixed content)
+- [ ] 02-02-PLAN.md — File import and LLM step extraction
+- [ ] 02-03-PLAN.md — Step review UI with confirmation gate
 
 ---
 
@@ -103,7 +108,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Desktop Foundation | 3/3 | Complete | 2026-03-26 |
-| 2. Algorithm Processing | 0/1 | Not started | - |
+| 2. Algorithm Processing | 0/3 | Planned | - |
 | 3. Code Generation & Execution | 0/1 | Not started | - |
 | 4. Explanation Engine | 0/1 | Not started | - |
 
