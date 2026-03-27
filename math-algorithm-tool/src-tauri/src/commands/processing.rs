@@ -3,6 +3,7 @@
 //! Provides commands for:
 //! - File import (PDF, TXT, MD)
 //! - Algorithm step extraction via LLM
+//! - Algorithm explanation generation via LLM
 use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
@@ -241,4 +242,106 @@ pub fn check_backend() -> Result<bool, String> {
         .map_err(|e| format!("Failed to check backend: {}", e))?;
 
     Ok(output.status.success())
+}
+
+/// Explanation for a single step
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StepExplanation {
+    #[serde(rename = "stepNumber")]
+    pub step_number: i32,
+    pub explanation: String,
+}
+
+/// Result of explanation generation
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExplanationResult {
+    pub summary: String,
+    #[serde(rename = "stepExplanations")]
+    pub step_explanations: Vec<StepExplanation>,
+    #[serde(rename = "codeExplanation")]
+    pub code_explanation: String,
+    #[serde(rename = "generatedAt")]
+    pub generated_at: String,
+}
+
+/// Generate explanation for algorithm steps and code using LLM
+#[command]
+pub fn generate_explanation(
+    steps_json: String,
+    code: Option<String>,
+    provider: String,
+) -> Result<ExplanationResult, String> {
+    // Retrieve API key from secure storage
+    let entry = Entry::new(SERVICE_NAME, &provider)
+        .map_err(|e| format!("Failed to access keychain: {}", e))?;
+    let api_key = entry.get_password()
+        .map_err(|e| format!("API key not configured for {}. Please add it in Settings.", provider))?;
+
+    // Call Python to generate explanation
+    let code_arg = match &code {
+        Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
+        None => "None".to_string(),
+    };
+
+    let output = Command::new("python3")
+        .arg("-c")
+        .arg(format!(
+            r#"
+import sys
+sys.path.insert(0, 'math-algorithm-tool')
+import json
+from datetime import datetime
+
+from src.processing.explanation_generator import generate_explanation
+
+# Parse steps from JSON
+steps_data = json.loads('''{}''')
+steps = []
+for s in steps_data.get('steps', []):
+    from src.processing.step_extractor import AlgorithmStep, Variable, ControlFlow, Confidence
+    variables = [Variable(**v) for v in s.get('variables', [])]
+    step = AlgorithmStep(
+        step_number=s['stepNumber'],
+        description=s['description'],
+        code_equivalent=s.get('codeEquivalent', ''),
+        variables=variables,
+        control_flow=s.get('controlFlow'),
+        confidence=s.get('confidence', 'medium'),
+        confidence_reason=s.get('confidenceReason')
+    )
+    steps.append(step)
+
+code = {}
+
+# Generate explanation
+result = generate_explanation(steps, code, '{}', '{}')
+
+print(json.dumps({{
+    'summary': result.summary,
+    'stepExplanations': [{{
+        'stepNumber': se.step_number,
+        'explanation': se.explanation
+    }} for se in result.step_explanations],
+    'codeExplanation': result.code_explanation,
+    'generatedAt': result.generated_at.isoformat()
+}}))
+"#,
+            steps_json.replace("'''", "\\'\\'\\'"),
+            code_arg,
+            provider,
+            api_key.replace("'", "'\\''")
+        ))
+        .output()
+        .map_err(|e| format!("Failed to generate explanation: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("Explanation generation error: {}", stderr));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let result: ExplanationResult = serde_json::from_str(&stdout)
+        .map_err(|e| format!("Failed to parse result: {} - stdout: {}", e, stdout))?;
+
+    Ok(result)
 }
