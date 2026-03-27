@@ -56,12 +56,13 @@
 10. System signals confidence level for ambiguous sections
 11. User can review and confirm step interpretation before code generation
 
-**Plans**: 3 plans (02-01, 02-02, 02-03)
+**Plans**: 4 plans (02-01, 02-02, 02-03, 02-04)
 
 **Plan list:**
 - [x] 02-01-PLAN.md — Input processing layer (text, LaTeX, mixed content)
 - [x] 02-02-PLAN.md — File import and LLM step extraction
 - [x] 02-03-PLAN.md — Step review UI with confirmation gate
+- [ ] 02-04-PLAN.md — Gap closure: Wire LLM step extraction (fix stub)
 
 ---
 
