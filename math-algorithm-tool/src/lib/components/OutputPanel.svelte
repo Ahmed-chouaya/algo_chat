@@ -2,7 +2,7 @@
   import { processedInput, isProcessing } from '$lib/stores/processing';
   import { algorithmStore } from '$lib/stores/algorithm';
   import { generatePythonCode, executePythonCode, type ExecutionResult } from '$lib/processing';
-  import { generateExplanation, type ExplanationState } from '$lib/api';
+  import { generateExplanation, chatAboutExplanation, type ExplanationState, type ChatContext } from '$lib/api';
   import { selectedProvider } from '$lib/stores/settings';
   import StepReview from './StepReview.svelte';
   
@@ -11,6 +11,10 @@
   let isGeneratingExplanation = $state(false);
   let generationError = $state<string | null>(null);
   let explanationError = $state<string | null>(null);
+  
+  // Chat state
+  let chatInput = $state('');
+  let isSendingChat = $state(false);
   
   const tabs = [
     { id: 'steps', label: 'Steps' },
@@ -101,6 +105,68 @@
   async function handleRegenerateExplanation() {
     algorithmStore.setExplanation(null);
     await handleGenerateExplanation();
+  }
+  
+  async function handleSendChat() {
+    if (!chatInput.trim() || !$algorithmStore.explanation || isSendingChat) return;
+    
+    const question = chatInput.trim();
+    chatInput = '';
+    isSendingChat = true;
+    
+    // Add user message to history
+    const userMessage = {
+      id: crypto.randomUUID(),
+      role: 'user' as const,
+      content: question,
+      timestamp: new Date()
+    };
+    algorithmStore.addChatMessage(userMessage);
+    
+    try {
+      // Build context
+      const chatContext: ChatContext = {
+        algorithmSummary: $algorithmStore.explanation?.summary || '',
+        steps: $algorithmStore.steps,
+        codeExplanation: $algorithmStore.explanation?.codeExplanation || '',
+        generatedCode: $algorithmStore.generatedCode
+      };
+      
+      // Get response
+      const response = await chatAboutExplanation(
+        question,
+        chatContext,
+        $algorithmStore.chatMessages
+      );
+      
+      // Add assistant response to history
+      const assistantMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant' as const,
+        content: response,
+        timestamp: new Date()
+      };
+      algorithmStore.addChatMessage(assistantMessage);
+    } catch (error) {
+      console.error('Chat failed:', error);
+      // Add error message
+      const errorMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant' as const,
+        content: `Sorry, I couldn't answer that question. ${error?.toString() || 'Please try again.'}`,
+        timestamp: new Date()
+      };
+      algorithmStore.addChatMessage(errorMessage);
+    } finally {
+      isSendingChat = false;
+    }
+  }
+  
+  function handleChatKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendChat();
+    }
   }
 </script>
 
@@ -334,6 +400,45 @@
               
               <div class="explanation-meta">
                 Generated: {explanation.generatedAt.toLocaleString()}
+              </div>
+              
+              <!-- Chat panel for follow-up questions -->
+              <div class="chat-panel">
+                <h3>Ask a Follow-up Question</h3>
+                <p class="chat-hint">Ask questions like "Why does step 3 use recursion?" or "What is the time complexity?"</p>
+                
+                <div class="chat-messages">
+                  {#each $algorithmStore.chatMessages as message (message.id)}
+                    <div class="chat-message" class:user={message.role === 'user'} class:assistant={message.role === 'assistant'}>
+                      <div class="message-content">{message.content}</div>
+                      <div class="message-time">{message.timestamp.toLocaleTimeString()}</div>
+                    </div>
+                  {/each}
+                  
+                  {#if isSendingChat}
+                    <div class="chat-message assistant">
+                      <div class="message-content">Thinking...</div>
+                    </div>
+                  {/if}
+                </div>
+                
+                <div class="chat-input-area">
+                  <textarea
+                    class="chat-input"
+                    placeholder="Ask a question..."
+                    bind:value={chatInput}
+                    onkeydown={handleChatKeydown}
+                    disabled={isSendingChat}
+                    rows="2"
+                  ></textarea>
+                  <button 
+                    class="btn btn-primary btn-send"
+                    onclick={handleSendChat}
+                    disabled={!chatInput.trim() || isSendingChat}
+                  >
+                    Send
+                  </button>
+                </div>
               </div>
             </div>
           {/if}
@@ -712,5 +817,103 @@
     word-break: break-word;
     max-height: 300px;
     overflow-y: auto;
+  }
+
+  /* Chat panel styles */
+  .chat-panel {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .chat-panel h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .chat-hint {
+    font-size: 13px;
+    color: var(--color-foreground);
+    opacity: 0.6;
+    margin: 0 0 var(--space-lg) 0;
+  }
+
+  .chat-messages {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+  }
+
+  .chat-message {
+    max-width: 85%;
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .chat-message.user {
+    align-self: flex-end;
+    background: var(--color-accent);
+    color: var(--bg-base);
+  }
+
+  .chat-message.assistant {
+    align-self: flex-start;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-foreground);
+  }
+
+  .message-content {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .message-time {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: var(--space-xs);
+  }
+
+  .chat-input-area {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-end;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-foreground);
+    resize: none;
+    min-height: 60px;
+  }
+
+  .chat-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .chat-input::placeholder {
+    color: var(--color-foreground);
+    opacity: 0.5;
+  }
+
+  .btn-send {
+    padding: var(--space-md) var(--space-xl);
   }
 </style>
