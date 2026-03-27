@@ -84,7 +84,11 @@
 8. Execution has timeout protection against infinite loops
 9. Execution has memory limits to prevent runaway processes
 
-**Plans**: TBD
+**Plans**: 2 plans (03-01, 03-02)
+
+**Plan list:**
+- [x] 03-01-PLAN.md — Code generation engine (AST-based Python code)
+- [ ] 03-02-PLAN.md — Execution sandbox with timeout/memory limits
 
 ---
 
@@ -110,7 +114,7 @@
 |-------|----------------|--------|-----------|
 | 1. Desktop Foundation | 3/3 | Complete | 2026-03-26 |
 | 2. Algorithm Processing | 0/3 | Planned | - |
-| 3. Code Generation & Execution | 0/1 | Not started | - |
+| 3. Code Generation & Execution | 0/2 | Planned | - |
 | 4. Explanation Engine | 0/1 | Not started | - |
 
 ---
