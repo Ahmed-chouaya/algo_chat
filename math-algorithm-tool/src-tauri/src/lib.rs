@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::process::Command;
 
 mod commands;
-use commands::processing::{import_file, extract_steps, check_backend, generate_explanation};
+use commands::processing::{import_file, extract_steps, check_backend, generate_explanation, chat_about_explanation};
 
 const SERVICE_NAME: &str = "math-algorithm-tool";
 
@@ -325,7 +325,8 @@ pub fn run() {
             import_file,
             extract_steps,
             check_backend,
-            generate_explanation
+            generate_explanation,
+            chat_about_explanation
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

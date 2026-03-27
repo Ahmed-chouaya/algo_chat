@@ -137,3 +137,114 @@ def generate_explanation(
         raise ValueError(f"Failed to parse LLM response as JSON: {e}")
     except Exception as e:
         raise ValueError(f"Explanation generation failed: {e}")
+
+
+# System prompt for chat follow-up questions
+CHAT_SYSTEM_PROMPT = """You are an expert at explaining mathematical algorithms in plain language.
+Your task is to answer follow-up questions about algorithms and their implementations.
+
+Guidelines:
+1. Use simple, clear language accessible to someone who knows math but isn't a programmer
+2. Reference specific steps and code when relevant
+3. If the user asks about a specific step (e.g., "Why does step 3 use recursion?"), provide contextual answer
+4. Be concise but thorough - answer what was asked
+
+Respond with valid JSON in this format:
+{"response": "Your answer here"}"""
+
+
+# User prompt template for chat
+CHAT_USER_PROMPT_TEMPLATE = """Context:
+- Algorithm Summary: {summary}
+
+- Steps:
+{steps}
+
+- Code Explanation: {code_explanation}
+
+- Generated Code (if available):
+```{python}
+{generated_code}
+```
+
+Previous conversation:
+{history}
+
+User's question: {question}
+
+Provide a JSON response with your answer."""
+
+
+def chat_about_explanation(
+    question: str,
+    algorithm_summary: str,
+    steps: list[AlgorithmStep],
+    code_explanation: str,
+    generated_code: Optional[str],
+    history: list,
+    provider_name: str,
+    api_key: str,
+) -> str:
+    """
+    Answer a follow-up question about the algorithm or code.
+
+    Args:
+        question: User's follow-up question
+        algorithm_summary: The algorithm summary from explanation generation
+        steps: List of algorithm steps
+        code_explanation: The code explanation from explanation generation
+        generated_code: Optional generated Python code
+        history: Previous chat messages
+        provider_name: Name of provider ("openai", "anthropic", "nvidia")
+        api_key: API key for the provider
+
+    Returns:
+        JSON string with the assistant's response
+
+    Raises:
+        ValueError: If chat fails
+    """
+    # Format steps for the prompt
+    steps_text = "\n".join(
+        f"Step {step.step_number}: {step.description}"
+        for step in steps
+    )
+
+    # Format history
+    history_text = ""
+    if history:
+        history_text = "\n".join(
+            f"{msg.role}: {msg.content}"
+            for msg in history[-10:]  # Last 10 messages
+        )
+
+    code_text = generated_code if generated_code else "No code generated yet."
+    code_exp_text = code_explanation if code_explanation else "No code explanation available."
+
+    user_prompt = CHAT_USER_PROMPT_TEMPLATE.format(
+        summary=algorithm_summary,
+        steps=steps_text,
+        code_explanation=code_exp_text,
+        generated_code=code_text,
+        history=history_text,
+        question=question,
+    )
+
+    try:
+        provider = get_provider(provider_name, api_key)
+
+        response_data = provider.generate_json(
+            prompt=user_prompt,
+            system_prompt=CHAT_SYSTEM_PROMPT,
+            temperature=0.5,
+            max_tokens=2048,
+        )
+
+        response = response_data.get("response", "I couldn't generate a response. Please try again.")
+
+        return json.dumps({"response": response})
+
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse LLM response as JSON: {e}")
+    except Exception as e:
+        raise ValueError(f"Chat failed: {e}")

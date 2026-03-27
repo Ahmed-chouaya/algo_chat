@@ -345,3 +345,118 @@ print(json.dumps({{
 
     Ok(result)
 }
+
+/// Chat message for conversation history
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChatMessageInput {
+    pub id: String,
+    pub role: String,
+    pub content: String,
+}
+
+/// Ask a follow-up question about the algorithm or code
+#[command]
+pub fn chat_about_explanation(
+    question: String,
+    algorithm_summary: String,
+    steps_json: String,
+    code_explanation: String,
+    generated_code: Option<String>,
+    history_json: String,
+) -> Result<String, String> {
+    // Retrieve API key - use a default provider
+    let provider = "nvidia";
+    let entry = Entry::new(SERVICE_NAME, provider)
+        .map_err(|e| format!("Failed to access keychain: {}", e))?;
+    let api_key = match entry.get_password() {
+        Ok(key) => key,
+        Err(_) => {
+            // Try openai as fallback
+            let entry = Entry::new(SERVICE_NAME, "openai")
+                .map_err(|e| format!("Failed to access keychain: {}", e))?;
+            entry.get_password()
+                .map_err(|e| format!("API key not configured. Please add it in Settings.",))?
+        }
+    };
+
+    // Call Python to handle chat
+    let code_arg = match &generated_code {
+        Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
+        None => "None".to_string(),
+    };
+
+    let output = Command::new("python3")
+        .arg("-c")
+        .arg(format!(
+            r#"
+import sys
+sys.path.insert(0, 'math-algorithm-tool')
+import json
+
+from src.processing.explanation_generator import chat_about_explanation
+
+# Parse steps from JSON
+steps_data = json.loads('''{}''')
+steps = []
+for s in steps_data.get('steps', []):
+    from src.processing.step_extractor import AlgorithmStep, Variable, ControlFlow, Confidence
+    variables = [Variable(**v) for v in s.get('variables', [])]
+    step = AlgorithmStep(
+        step_number=s['stepNumber'],
+        description=s['description'],
+        code_equivalent=s.get('codeEquivalent', ''),
+        variables=variables,
+        control_flow=s.get('controlFlow'),
+        confidence=s.get('confidence', 'medium'),
+        confidence_reason=s.get('confidenceReason')
+    )
+    steps.append(step)
+
+# Parse history
+history_data = json.loads('''{}''')
+history = []
+for m in history_data.get('messages', []):
+    from dataclasses import dataclass
+    @dataclass
+    class Msg:
+        id: str
+        role: str
+        content: str
+    history.append(Msg(id=m['id'], role=m['role'], content=m['content']))
+
+code = {}
+
+# Generate chat response
+result = chat_about_explanation(
+    question='{}',
+    algorithm_summary='{}',
+    steps=steps,
+    code_explanation='{}',
+    generated_code=code,
+    history=history,
+    provider='{}',
+    api_key='{}'
+)
+
+print(json.dumps(result))
+"#,
+            steps_json.replace("'''", "\\'\\'\\'"),
+            history_json.replace("'''", "\\'\\'\\'"),
+            question.replace("'", "\\'"),
+            algorithm_summary.replace("'", "\\'"),
+            code_explanation.replace("'", "\\'"),
+            code_arg,
+            provider,
+            api_key.replace("'", "\\'")
+        ))
+        .output()
+        .map_err(|e| format!("Failed to chat: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("Chat error: {}", stderr));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    Ok(stdout.trim().to_string())
+}

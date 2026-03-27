@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { AlgorithmStep } from '$lib/processing';
+import type { ChatMessage } from './stores/algorithm';
 
 export type Provider = 'nvidia' | 'openai' | 'anthropic';
 
@@ -66,4 +67,40 @@ export async function generateExplanation(
     codeExplanation: result.codeExplanation,
     generatedAt: new Date(result.generatedAt),
   };
+}
+
+/** Context for chat follow-up questions */
+export interface ChatContext {
+  algorithmSummary: string;
+  steps: AlgorithmStep[];
+  codeExplanation: string;
+  generatedCode: string | null;
+}
+
+/**
+ * Ask a follow-up question about the algorithm or code.
+ * 
+ * @param question - User's follow-up question
+ * @param context - Algorithm context (summary, steps, code explanation)
+ * @param history - Previous chat messages for context
+ * @returns Assistant's response to the question
+ */
+export async function chatAboutExplanation(
+  question: string,
+  context: ChatContext,
+  history: ChatMessage[]
+): Promise<string> {
+  // Build a prompt that includes context and history
+  const stepsJson = JSON.stringify({ steps: context.steps });
+  
+  const result = await invoke<string>('chat_about_explanation', {
+    question,
+    algorithmSummary: context.algorithmSummary,
+    stepsJson,
+    codeExplanation: context.codeExplanation,
+    generatedCode: context.generatedCode,
+    historyJson: JSON.stringify({ messages: history })
+  });
+  
+  return result;
 }
