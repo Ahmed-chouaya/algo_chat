@@ -104,7 +104,11 @@
 2. System explains each major step in accessible terms
 3. System explains what the generated code does (not just what the algorithm does)
 
-**Plans**: TBD
+**Plans**: 2 plans (04-01, 04-02)
+
+**Plan list:**
+- [ ] 04-01-PLAN.md — Explanation tab with summary, step explanations, and code explanations
+- [ ] 04-02-PLAN.md — Chat interface for follow-up questions
 
 ---
 
@@ -113,9 +117,9 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Desktop Foundation | 3/3 | Complete | 2026-03-26 |
-| 2. Algorithm Processing | 0/3 | Planned | - |
-| 3. Code Generation & Execution | 0/2 | Planned | - |
-| 4. Explanation Engine | 0/1 | Not started | - |
+| 2. Algorithm Processing | 3/3 | Complete | 2026-03-27 |
+| 3. Code Generation & Execution | 2/2 | Complete | 2026-03-27 |
+| 4. Explanation Engine | 0/2 | Planned | - |
 
 ---
 
