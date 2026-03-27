@@ -1,14 +1,17 @@
 <script lang="ts">
   import { processedInput, isProcessing } from '$lib/stores/processing';
   import { algorithmStore } from '$lib/stores/algorithm';
+  import { generatePythonCode, executePythonCode, type ExecutionResult } from '$lib/processing';
   import StepReview from './StepReview.svelte';
   
-  let activeTab = $state('steps');
+  let activeTab = $state<'steps' | 'code' | 'results'>('steps');
+  let isGenerating = $state(false);
+  let generationError = $state<string | null>(null);
   
   const tabs = [
     { id: 'steps', label: 'Steps' },
     { id: 'code', label: 'Code' },
-    { id: 'explanation', label: 'Explanation' }
+    { id: 'results', label: 'Results' }
   ] as const;
 
   function handleConfirm() {
@@ -18,6 +21,55 @@
   function handleRegenerate() {
     // Reset confirmation and trigger re-processing
     algorithmStore.setSteps($algorithmStore.steps);
+  }
+
+  async function handleGenerateCode() {
+    if ($algorithmStore.steps.length === 0) return;
+    
+    isGenerating = true;
+    generationError = null;
+    
+    try {
+      const result = await generatePythonCode($algorithmStore.steps);
+      
+      if (result.code) {
+        algorithmStore.setGeneratedCode(result.code, result);
+      }
+      
+      if (result.errors && result.errors.length > 0) {
+        generationError = result.errors.join(', ');
+      }
+    } catch (error) {
+      console.error('Code generation failed:', error);
+      generationError = error?.toString() || 'Failed to generate code';
+    } finally {
+      isGenerating = false;
+    }
+  }
+
+  async function handleRunCode() {
+    if (!$algorithmStore.generatedCode) return;
+    
+    algorithmStore.setExecuting(true);
+    algorithmStore.setExecutionResult(null);
+    
+    try {
+      const result = await executePythonCode($algorithmStore.generatedCode);
+      algorithmStore.setExecutionResult(result);
+    } catch (error) {
+      console.error('Code execution failed:', error);
+      algorithmStore.setExecutionResult({
+        stdout: '',
+        stderr: '',
+        return_code: -1,
+        timed_out: false,
+        memory_exceeded: false,
+        execution_time_ms: 0,
+        error_message: error?.toString() || 'Failed to execute code'
+      });
+    } finally {
+      algorithmStore.setExecuting(false);
+    }
   }
 </script>
 
@@ -87,11 +139,42 @@
         <div class="code-generation-panel">
           {#if $algorithmStore.steps.length > 0}
             {#if $algorithmStore.confirmed}
-              <p>Code will be generated here...</p>
-              <p class="hint">Click "Generate Code" to create the implementation.</p>
-              <button class="btn btn-primary btn-generate">
-                Generate Code
-              </button>
+              {#if $algorithmStore.generatedCode}
+                <div class="code-display">
+                  <pre><code>{$algorithmStore.generatedCode}</code></pre>
+                </div>
+                <div class="code-actions">
+                  <button 
+                    class="btn btn-primary btn-run" 
+                    onclick={handleRunCode}
+                    disabled={$algorithmStore.isExecuting}
+                  >
+                    {$algorithmStore.isExecuting ? 'Running...' : '▶ Run Code'}
+                  </button>
+                  <button 
+                    class="btn btn-secondary" 
+                    onclick={handleGenerateCode}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? 'Generating...' : 'Regenerate'}
+                  </button>
+                </div>
+                {#if generationError}
+                  <div class="error-message">{generationError}</div>
+                {/if}
+              {:else}
+                <p>Click the button to generate Python code from the algorithm steps.</p>
+                <button 
+                  class="btn btn-primary btn-generate" 
+                  onclick={handleGenerateCode}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? 'Generating...' : 'Generate Code'}
+                </button>
+                {#if generationError}
+                  <div class="error-message">{generationError}</div>
+                {/if}
+              {/if}
             {:else}
               <div class="gate-notice">
                 <span class="gate-icon">🔒</span>
@@ -105,10 +188,59 @@
             </div>
           {/if}
         </div>
-      {:else if activeTab === 'explanation'}
-        <div class="content-placeholder">
-          <p>Explanation will appear here...</p>
-          <p class="hint">Detailed explanation of the algorithm and its implementation.</p>
+      {:else if activeTab === 'results'}
+        <div class="results-panel">
+          {#if $algorithmStore.executionResult}
+            {@const result = $algorithmStore.executionResult}
+            <div class="result-status" class:error={result.error_message || result.return_code !== 0}>
+              {#if result.timed_out}
+                <span class="status-icon">⏱️</span>
+                <span>Execution timed out</span>
+              {:else if result.memory_exceeded}
+                <span class="status-icon">💾</span>
+                <span>Memory limit exceeded</span>
+              {:else if result.error_message}
+                <span class="status-icon">⚠️</span>
+                <span>{result.error_message}</span>
+              {:else if result.return_code === 0}
+                <span class="status-icon">✓</span>
+                <span>Execution successful</span>
+              {:else}
+                <span class="status-icon">✗</span>
+                <span>Execution failed (code {result.return_code})</span>
+              {/if}
+            </div>
+            
+            {#if result.execution_time_ms > 0}
+              <div class="execution-time">
+                Executed in {result.execution_time_ms}ms
+              </div>
+            {/if}
+            
+            {#if result.stdout}
+              <div class="output-section">
+                <h4>Output</h4>
+                <pre class="output-text">{result.stdout}</pre>
+              </div>
+            {/if}
+            
+            {#if result.stderr}
+              <div class="output-section error">
+                <h4>Errors</h4>
+                <pre class="output-text">{result.stderr}</pre>
+              </div>
+            {/if}
+          {:else if $algorithmStore.generatedCode}
+            <div class="content-placeholder">
+              <p>Run your code to see results</p>
+              <p class="hint">Click "Run Code" in the Code tab to execute the generated Python code.</p>
+            </div>
+          {:else}
+            <div class="content-placeholder">
+              <p>Results will appear here...</p>
+              <p class="hint">Generate and run code to see execution results.</p>
+            </div>
+          {/if}
         </div>
       {/if}
     {:else}
@@ -122,10 +254,10 @@
           <p>Generated code will appear here...</p>
           <p class="hint">Executable Python code will be generated from the algorithm.</p>
         </div>
-      {:else if activeTab === 'explanation'}
+      {:else if activeTab === 'results'}
         <div class="content-placeholder">
-          <p>Explanation will appear here...</p>
-          <p class="hint">Detailed explanation of the algorithm and its implementation.</p>
+          <p>Execution results will appear here...</p>
+          <p class="hint">Run code to see stdout, stderr, and execution status.</p>
         </div>
       {/if}
     {/if}
@@ -159,6 +291,9 @@
     padding: var(--space-sm) 0;
     position: relative;
     transition: var(--transition);
+    background: none;
+    border: none;
+    cursor: pointer;
   }
   
   .tab-btn:hover {
@@ -284,12 +419,17 @@
     border: none;
   }
 
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .btn-primary {
     background: var(--color-accent);
     color: var(--bg-base);
   }
 
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     filter: brightness(1.1);
   }
 
@@ -299,7 +439,7 @@
     color: var(--color-foreground);
   }
 
-  .btn-secondary:hover {
+  .btn-secondary:hover:not(:disabled) {
     border-color: var(--color-accent);
     color: var(--color-accent);
   }
@@ -349,6 +489,14 @@
     font-size: 16px;
   }
 
+  .btn-run {
+    background: var(--color-success);
+  }
+
+  .btn-run:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
   .gate-notice {
     background: var(--color-surface);
     border-radius: var(--radius-lg);
@@ -368,5 +516,100 @@
 
   .gate-icon {
     font-size: 32px;
+  }
+
+  .code-display {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .code-display pre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-foreground);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .code-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    justify-content: center;
+  }
+
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-md);
+    font-size: 14px;
+  }
+
+  /* Results panel styles */
+  .results-panel {
+    min-height: 200px;
+  }
+
+  .result-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--color-success);
+    font-weight: 500;
+    margin-bottom: var(--space-md);
+  }
+
+  .result-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .status-icon {
+    font-size: 20px;
+  }
+
+  .execution-time {
+    font-size: 13px;
+    color: var(--color-foreground);
+    opacity: 0.6;
+    margin-bottom: var(--space-lg);
+  }
+
+  .output-section {
+    margin-bottom: var(--space-lg);
+  }
+
+  .output-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .output-section.error h4 {
+    color: #ef4444;
+  }
+
+  .output-text {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-foreground);
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
   }
 </style>

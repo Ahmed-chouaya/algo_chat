@@ -71,6 +71,17 @@ export interface CodeGenerationResult {
   errors: string[];
 }
 
+// Code execution types
+export interface ExecutionResult {
+  stdout: string;
+  stderr: string;
+  return_code: number;
+  timed_out: boolean;
+  memory_exceeded: boolean;
+  execution_time_ms: number;
+  error_message: string | null;
+}
+
 /**
  * Process algorithm input text through the Python backend.
  * 
@@ -145,5 +156,55 @@ export async function checkProcessingBackend(): Promise<boolean> {
     return result;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Execute Python code using the backend sandbox.
+ * 
+ * @param code - Python source code to execute
+ * @param userInput - Optional user input to pass to the code via stdin
+ * @returns ExecutionResult with stdout, stderr, and status flags
+ */
+export async function executePythonCode(code: string, userInput?: Record<string, unknown>): Promise<ExecutionResult> {
+  try {
+    const userInputJson = userInput ? JSON.stringify(userInput) : null;
+    const result = await invoke<ExecutionResult>('execute_python', { 
+      code, 
+      userInput: userInputJson 
+    });
+    return result;
+  } catch (error) {
+    console.error('Failed to execute Python code:', error);
+    return {
+      stdout: '',
+      stderr: '',
+      return_code: -1,
+      timed_out: false,
+      memory_exceeded: false,
+      execution_time_ms: 0,
+      error_message: error?.toString() || 'Unknown error executing code'
+    };
+  }
+}
+
+/**
+ * Generate Python code from algorithm steps.
+ * 
+ * @param steps - List of AlgorithmStep objects
+ * @returns CodeGenerationResult with generated code and metadata
+ */
+export async function generatePythonCode(steps: AlgorithmStep[]): Promise<CodeGenerationResult> {
+  try {
+    const result = await invoke<CodeGenerationResult>('generate_python_code', { steps });
+    return result;
+  } catch (error) {
+    console.error('Failed to generate Python code:', error);
+    return {
+      code: '',
+      syntax_valid: false,
+      variable_mapping: {},
+      errors: [error?.toString() || 'Unknown error']
+    };
   }
 }

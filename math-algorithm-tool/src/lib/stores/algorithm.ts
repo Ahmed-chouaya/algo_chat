@@ -4,18 +4,26 @@
  * Manages the extracted steps, confirmation status, and processing state.
  */
 import { writable } from 'svelte/store';
-import type { AlgorithmStep } from '$lib/processing';
+import type { AlgorithmStep, CodeGenerationResult, ExecutionResult } from '$lib/processing';
 
 export interface AlgorithmState {
   steps: AlgorithmStep[];
   confirmed: boolean;
   isProcessing: boolean;
+  generatedCode: string | null;
+  codeGenerationResult: CodeGenerationResult | null;
+  executionResult: ExecutionResult | null;
+  isExecuting: boolean;
 }
 
 const initialState: AlgorithmState = {
   steps: [],
   confirmed: false,
-  isProcessing: false
+  isProcessing: false,
+  generatedCode: null,
+  codeGenerationResult: null,
+  executionResult: null,
+  isExecuting: false
 };
 
 function createAlgorithmStore() {
@@ -37,7 +45,19 @@ function createAlgorithmStore() {
     
     /** Update processing state */
     setProcessing: (isProcessing: boolean) => 
-      update(state => ({ ...state, isProcessing }))
+      update(state => ({ ...state, isProcessing })),
+    
+    /** Set generated code */
+    setGeneratedCode: (code: string, generationResult: CodeGenerationResult | null) =>
+      update(state => ({ ...state, generatedCode: code, codeGenerationResult: generationResult })),
+    
+    /** Set execution result */
+    setExecutionResult: (result: ExecutionResult | null) =>
+      update(state => ({ ...state, executionResult: result })),
+    
+    /** Set executing state */
+    setExecuting: (isExecuting: boolean) =>
+      update(state => ({ ...state, isExecuting }))
   };
 }
 
