@@ -1,9 +1,26 @@
 <script lang="ts">
+  import { processAlgorithmInput } from '$lib/processing';
+  import { processedInput, isProcessing, processingError } from '$lib/stores/processing';
+  
   let algorithmInput = $state('');
   
-  function handleSubmit() {
-    // TODO: Connect to backend processing
-    console.log('Submitting algorithm:', algorithmInput);
+  async function handleSubmit() {
+    if (!algorithmInput.trim()) {
+      return;
+    }
+    
+    $isProcessing = true;
+    $processingError = null;
+    
+    try {
+      const result = await processAlgorithmInput(algorithmInput);
+      $processedInput = result;
+    } catch (error) {
+      console.error('Processing error:', error);
+      $processingError = error instanceof Error ? error.message : 'Failed to process algorithm';
+    } finally {
+      $isProcessing = false;
+    }
   }
 </script>
 
@@ -21,8 +38,16 @@
     <button class="btn btn-outline">Import Text</button>
   </div>
   
-  <button class="btn btn-submit" onclick={handleSubmit}>
-    Process Algorithm
+  {#if $processingError}
+    <div class="error-message">{$processingError}</div>
+  {/if}
+  
+  <button class="btn btn-submit" onclick={handleSubmit} disabled={$isProcessing}>
+    {#if $isProcessing}
+      Processing...
+    {:else}
+      Process Algorithm
+    {/if}
   </button>
 </aside>
 
@@ -109,5 +134,18 @@
   
   .btn-submit:active {
     transform: scale(0.98);
+  }
+  
+  .btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    color: #ef4444;
+    font-size: 14px;
+    padding: var(--space-sm);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-md);
   }
 </style>
