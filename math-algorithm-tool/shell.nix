@@ -5,6 +5,13 @@ pkgs.mkShell {
     # Node.js for frontend
     nodejs_20
 
+    # Python for backend processing
+    python313
+    python313Packages.pip
+    python313Packages.pytest
+    python313Packages.sympy
+    python313Packages.antlr4-python3-runtime
+
     # Rust toolchain components
     rustc
     cargo
