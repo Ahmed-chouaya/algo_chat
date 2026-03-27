@@ -59,7 +59,7 @@
 **Plans**: 3 plans (02-01, 02-02, 02-03)
 
 **Plan list:**
-- [ ] 02-01-PLAN.md — Input processing layer (text, LaTeX, mixed content)
+- [x] 02-01-PLAN.md — Input processing layer (text, LaTeX, mixed content)
 - [ ] 02-02-PLAN.md — File import and LLM step extraction
 - [ ] 02-03-PLAN.md — Step review UI with confirmation gate
 

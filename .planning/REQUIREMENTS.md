@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Input & Parsing
 
-- [ ] **INPT-01**: User can paste or type a mathematical algorithm description from a paper
-- [ ] **INPT-02**: System handles LaTeX mathematical notation in input
-- [ ] **INPT-03**: System handles plain text mathematical descriptions (without LaTeX)
-- [ ] **INPT-04**: System extracts mathematical expressions from mixed content
+- [x] **INPT-01**: User can paste or type a mathematical algorithm description from a paper
+- [x] **INPT-02**: System handles LaTeX mathematical notation in input
+- [x] **INPT-03**: System handles plain text mathematical descriptions (without LaTeX)
+- [x] **INPT-04**: System extracts mathematical expressions from mixed content
 - [ ] **INPT-05**: User can import PDF files containing algorithm descriptions
 - [ ] **INPT-06**: User can import common text file formats (.txt, .md)
 
@@ -100,10 +100,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INPT-01 | Phase 2 | Pending |
-| INPT-02 | Phase 2 | Pending |
-| INPT-03 | Phase 2 | Pending |
-| INPT-04 | Phase 2 | Pending |
+| INPT-01 | Phase 2 | Complete |
+| INPT-02 | Phase 2 | Complete |
+| INPT-03 | Phase 2 | Complete |
+| INPT-04 | Phase 2 | Complete |
 | INPT-05 | Phase 2 | Pending |
 | INPT-06 | Phase 2 | Pending |
 | STEP-01 | Phase 2 | Pending |
