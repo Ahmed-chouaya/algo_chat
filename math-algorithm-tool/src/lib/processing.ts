@@ -115,8 +115,13 @@ export async function extractAlgorithmSteps(text: string, provider: string): Pro
   try {
     const result = await invoke<ExtractionResult>('extract_steps', { text, provider });
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to extract algorithm steps:', error);
+    // Provide helpful error message for missing API key
+    const errorStr = error?.toString?.() || String(error) || '';
+    if (errorStr.includes('API key') || errorStr.includes('keychain') || errorStr.includes('Settings')) {
+      throw new Error('API key not configured. Please go to Settings → API Keys to add your API key.');
+    }
     throw error;
   }
 }

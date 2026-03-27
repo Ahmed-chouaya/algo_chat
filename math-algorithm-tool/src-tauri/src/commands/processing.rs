@@ -3,9 +3,12 @@
 //! Provides commands for:
 //! - File import (PDF, TXT, MD)
 //! - Algorithm step extraction via LLM
+use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 use tauri::command;
+
+const SERVICE_NAME: &str = "math-algorithm-tool";
 
 /// Supported file formats for import
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -159,8 +162,13 @@ print(json.dumps({{
 
     let processed_json = String::from_utf8_lossy(&process_output.stdout);
 
-    // Now call the LLM to extract steps
-    // Note: This requires API key to be available - the frontend should handle provider selection
+    // Retrieve API key from secure storage
+    let entry = Entry::new(SERVICE_NAME, &provider)
+        .map_err(|e| format!("Failed to access keychain: {}", e))?;
+    let api_key = entry.get_password()
+        .map_err(|e| format!("API key not configured for {}. Please add it in Settings.", provider))?;
+
+    // Now call the LLM to extract steps using the Python step_extractor
     let extract_output = Command::new("python3")
         .arg("-c")
         .arg(format!(
@@ -169,19 +177,43 @@ import sys
 sys.path.insert(0, 'math-algorithm-tool')
 import json
 
-# Import the processed data
-processed_data = {}
+from src.processing.text_processor import ProcessedInput
+from src.processing.step_extractor import extract_steps_with_provider_name
 
-# Call step extractor (would need actual API key in production)
-# For now, return a placeholder response
+# Parse the processed data from text processing step
+processed_json_data = '''{}'''
+processed_data = json.loads(processed_json_data)
+processed_input = ProcessedInput(**processed_data)
+
+# Extract steps using LLM with API key
+result = extract_steps_with_provider_name(
+    processed_input,
+    '{}',
+    '{}'
+)
+
 print(json.dumps({{
-    'steps': [],
-    'provider': '{}',
-    'model': 'placeholder'
+    'steps': [{{
+        'stepNumber': s.step_number,
+        'description': s.description,
+        'codeEquivalent': s.code_equivalent,
+        'variables': [{{
+            'name': v.name,
+            'type': v.type,
+            'initialValue': v.initial_value,
+            'description': v.description
+        }} for v in s.variables],
+        'controlFlow': s.control_flow,
+        'confidence': s.confidence,
+        'confidenceReason': s.confidence_reason
+    }} for s in result.steps],
+    'provider': result.provider,
+    'model': result.model
 }}))
 "#,
+            processed_json.trim().replace("'''", "\\'\\'\\'"),
             provider,
-            processed_json.trim()
+            api_key.replace("'", "'\\''")
         ))
         .output()
         .map_err(|e| format!("Failed to extract steps: {}", e))?;
