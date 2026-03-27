@@ -5,7 +5,7 @@ pkgs.mkShell {
     # Node.js for frontend
     nodejs_20
 
-    # Rust toolchain
+    # Rust toolchain components
     rustc
     cargo
 
@@ -24,10 +24,10 @@ pkgs.mkShell {
 
     # Additional Tauri deps
     librsvg
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXrandr
-    xorg.libXtst
+    libxcomposite
+    libxdamage
+    libxrandr
+    libxtst
     libxkbcommon
     dbus
     gcc

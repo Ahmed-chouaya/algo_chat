@@ -4,9 +4,6 @@
 , wrapGAppsHook3
 , pkg-config
 , nodejs_20
-, rustPlatform
-, cargo
-, rustc
 , glib
 , gtk3
 , cairo
@@ -19,7 +16,10 @@
 , librsvg
 , libxkbcommon
 , dbus
-, xorg
+, libxcomposite
+, libxdamage
+, libxrandr
+, libxtst
 , gcc
 , gnumake
 , makeWrapper
@@ -29,12 +29,10 @@ let
   pname = "math-algorithm-tool";
   version = "0.1.0";
 in
-rustPlatform.buildRustPackage {
+stdenv.mkDerivation {
   inherit pname version;
 
   src = ./.;
-
-  cargoLock.lockFile = ./src-tauri/Cargo.lock;
 
   nativeBuildInputs = [
     autoPatchelfHook
@@ -42,11 +40,11 @@ rustPlatform.buildRustPackage {
     pkg-config
     nodejs_20
     makeWrapper
+    gcc
+    gnumake
   ];
 
   buildInputs = [
-    gcc
-    gnumake
     glib
     gtk3
     cairo
@@ -59,14 +57,21 @@ rustPlatform.buildRustPackage {
     librsvg
     libxkbcommon
     dbus
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXrandr
-    xorg.libXtst
+    libxcomposite
+    libxdamage
+    libxrandr
+    libxtst
   ];
+
+  configurePhase = ''
+    export HOME=$TMPDIR
+    npm install
+  '';
 
   buildPhase = ''
     export HOME=$TMPDIR
+    export PATH="$HOME/.cargo/bin:$PATH"
+
     npm run build
     npm run tauri build -- --bundles none
   '';
@@ -74,15 +79,12 @@ rustPlatform.buildRustPackage {
   installPhase = ''
     mkdir -p $out/bin
     mkdir -p $out/share/${pname}
+
     cp src-tauri/target/release/math-algorithm-tool $out/bin/
     cp -r build/* $out/share/${pname}/
 
     wrapProgram $out/bin/math-algorithm-tool \
       --prefix XDG_DATA_DIRS "$out/share:$XDG_DATA_DIRS"
-  '';
-
-  postFixup = ''
-    patchelf --set-rpath "${lib.makeLibraryPath buildInputs}" $out/bin/math-algorithm-tool
   '';
 
   meta = with lib; {
