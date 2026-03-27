@@ -10,6 +10,7 @@ Uses subprocess with resource limits for sandboxing.
 import io
 import json
 import os
+import resource
 import signal
 import subprocess
 import tempfile
@@ -67,20 +68,28 @@ def execute_python(
         
         # Set up memory limit (in bytes)
         memory_bytes = memory_limit_mb * 1024 * 1024
-        
+
+        def _set_memory_limit(mem_bytes: int):
+            """Set memory limit for subprocess. Call in preexec_fn before fork."""
+            if os.name == 'nt':
+                # Windows doesn't support resource module
+                return
+            if mem_bytes <= 0:
+                return
+            try:
+                resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
+            except (OSError, ValueError):
+                # May fail on some systems (e.g., insufficient permissions)
+                # Log but don't fail the execution
+                pass
+
         # Run the subprocess
         process = subprocess.Popen(
             ['python3', temp_file],
             stdin=subprocess.PIPE if stdin_data else subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            preexec_fn=lambda: (
-                # Set memory limit
-                # Note: This may not work on all platforms (e.g., macOS)
-                None if os.name == 'nt' else 
-                (lambda: None if memory_bytes <= 0 else 
-                    None)() or None
-            )
+            preexec_fn=lambda: _set_memory_limit(memory_bytes)
         )
         
         try:
