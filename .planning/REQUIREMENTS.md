@@ -13,17 +13,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INPT-02**: System handles LaTeX mathematical notation in input
 - [x] **INPT-03**: System handles plain text mathematical descriptions (without LaTeX)
 - [x] **INPT-04**: System extracts mathematical expressions from mixed content
-- [ ] **INPT-05**: User can import PDF files containing algorithm descriptions
-- [ ] **INPT-06**: User can import common text file formats (.txt, .md)
+- [x] **INPT-05**: User can import PDF files containing algorithm descriptions
+- [x] **INPT-06**: User can import common text file formats (.txt, .md)
 
 ### Structured Steps
 
-- [ ] **STEP-01**: System presents algorithm as numbered, structured steps
-- [ ] **STEP-02**: Each step includes a plain language explanation
-- [ ] **STEP-03**: Steps identify variables, their types, and initial values
-- [ ] **STEP-04**: Steps identify control flow (loops, conditionals, branching)
-- [ ] **STEP-05**: System signals confidence level for ambiguous sections
-- [ ] **STEP-06**: User can review and confirm step interpretation before code generation
+- [x] **STEP-01**: System presents algorithm as numbered, structured steps
+- [x] **STEP-02**: Each step includes a plain language explanation
+- [x] **STEP-03**: Steps identify variables, their types, and initial values
+- [x] **STEP-04**: Steps identify control flow (loops, conditionals, branching)
+- [x] **STEP-05**: System signals confidence level for ambiguous sections
+- [x] **STEP-06**: User can review and confirm step interpretation before code generation
 
 ### Code Generation
 
@@ -104,14 +104,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INPT-02 | Phase 2 | Complete |
 | INPT-03 | Phase 2 | Complete |
 | INPT-04 | Phase 2 | Complete |
-| INPT-05 | Phase 2 | Pending |
-| INPT-06 | Phase 2 | Pending |
-| STEP-01 | Phase 2 | Pending |
-| STEP-02 | Phase 2 | Pending |
-| STEP-03 | Phase 2 | Pending |
-| STEP-04 | Phase 2 | Pending |
-| STEP-05 | Phase 2 | Pending |
-| STEP-06 | Phase 2 | Pending |
+| INPT-05 | Phase 2 | Complete |
+| INPT-06 | Phase 2 | Complete |
+| STEP-01 | Phase 2 | Complete |
+| STEP-02 | Phase 2 | Complete |
+| STEP-03 | Phase 2 | Complete |
+| STEP-04 | Phase 2 | Complete |
+| STEP-05 | Phase 2 | Complete |
+| STEP-06 | Phase 2 | Complete |
 | CODE-01 | Phase 3 | Pending |
 | CODE-02 | Phase 3 | Pending |
 | CODE-03 | Phase 3 | Pending |
