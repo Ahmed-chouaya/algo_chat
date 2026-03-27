@@ -2,16 +2,21 @@
   import { processedInput, isProcessing } from '$lib/stores/processing';
   import { algorithmStore } from '$lib/stores/algorithm';
   import { generatePythonCode, executePythonCode, type ExecutionResult } from '$lib/processing';
+  import { generateExplanation, type ExplanationState } from '$lib/api';
+  import { selectedProvider } from '$lib/stores/settings';
   import StepReview from './StepReview.svelte';
   
-  let activeTab = $state<'steps' | 'code' | 'results'>('steps');
+  let activeTab = $state<'steps' | 'code' | 'results' | 'explanation'>('steps');
   let isGenerating = $state(false);
+  let isGeneratingExplanation = $state(false);
   let generationError = $state<string | null>(null);
+  let explanationError = $state<string | null>(null);
   
   const tabs = [
     { id: 'steps', label: 'Steps' },
     { id: 'code', label: 'Code' },
-    { id: 'results', label: 'Results' }
+    { id: 'results', label: 'Results' },
+    { id: 'explanation', label: 'Explanation' }
   ] as const;
 
   function handleConfirm() {
@@ -70,6 +75,32 @@
     } finally {
       algorithmStore.setExecuting(false);
     }
+  }
+
+  async function handleGenerateExplanation() {
+    if ($algorithmStore.steps.length === 0) return;
+    
+    isGeneratingExplanation = true;
+    explanationError = null;
+    
+    try {
+      const result = await generateExplanation(
+        $algorithmStore.steps,
+        $algorithmStore.generatedCode,
+        $selectedProvider
+      );
+      algorithmStore.setExplanation(result);
+    } catch (error) {
+      console.error('Explanation generation failed:', error);
+      explanationError = error?.toString() || 'Failed to generate explanation';
+    } finally {
+      isGeneratingExplanation = false;
+    }
+  }
+
+  async function handleRegenerateExplanation() {
+    algorithmStore.setExplanation(null);
+    await handleGenerateExplanation();
   }
 </script>
 
@@ -242,6 +273,71 @@
             </div>
           {/if}
         </div>
+      {:else if activeTab === 'explanation'}
+        <div class="explanation-panel">
+          {#if $algorithmStore.steps.length === 0}
+            <div class="content-placeholder">
+              <p>Explanation will appear here...</p>
+              <p class="hint">Process an algorithm to generate an explanation.</p>
+            </div>
+          {:else if !$algorithmStore.explanation}
+            <div class="explanation-prompt">
+              <p>Get a plain language explanation of what this algorithm does and how it works.</p>
+              <button 
+                class="btn btn-primary btn-generate" 
+                onclick={handleGenerateExplanation}
+                disabled={isGeneratingExplanation}
+              >
+                {isGeneratingExplanation ? 'Generating...' : 'Generate Explanation'}
+              </button>
+              {#if explanationError}
+                <div class="error-message">{explanationError}</div>
+              {/if}
+            </div>
+          {:else}
+            {@const explanation = $algorithmStore.explanation}
+            <div class="explanation-content">
+              <div class="explanation-header">
+                <button 
+                  class="btn btn-secondary btn-regenerate"
+                  onclick={handleRegenerateExplanation}
+                  disabled={isGeneratingExplanation}
+                >
+                  {isGeneratingExplanation ? 'Generating...' : 'Regenerate'}
+                </button>
+              </div>
+              
+              <div class="explanation-section">
+                <h3>Algorithm Summary</h3>
+                <p class="summary-text">{explanation.summary}</p>
+              </div>
+              
+              {#if explanation.stepExplanations.length > 0}
+                <div class="explanation-section">
+                  <h3>Step-by-Step Explanation</h3>
+                  <ol class="step-explanations">
+                    {#each explanation.stepExplanations as stepExp}
+                      <li class="step-explanation">
+                        <strong>Step {stepExp.stepNumber}:</strong> {stepExp.explanation}
+                      </li>
+                    {/each}
+                  </ol>
+                </div>
+              {/if}
+              
+              {#if explanation.codeExplanation}
+                <div class="explanation-section">
+                  <h3>Code Explanation</h3>
+                  <p class="code-explanation-text">{explanation.codeExplanation}</p>
+                </div>
+              {/if}
+              
+              <div class="explanation-meta">
+                Generated: {explanation.generatedAt.toLocaleString()}
+              </div>
+            </div>
+          {/if}
+        </div>
       {/if}
     {:else}
       {#if activeTab === 'steps'}
@@ -258,6 +354,11 @@
         <div class="content-placeholder">
           <p>Execution results will appear here...</p>
           <p class="hint">Run code to see stdout, stderr, and execution status.</p>
+        </div>
+      {:else if activeTab === 'explanation'}
+        <div class="content-placeholder">
+          <p>Explanation will appear here...</p>
+          <p class="hint">Process an algorithm to generate an explanation.</p>
         </div>
       {/if}
     {/if}
