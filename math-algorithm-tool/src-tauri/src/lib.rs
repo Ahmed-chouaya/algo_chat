@@ -3,6 +3,9 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 
+mod commands;
+use commands::processing::{import_file, extract_steps, check_backend};
+
 const SERVICE_NAME: &str = "math-algorithm-tool";
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -133,7 +136,10 @@ pub fn run() {
             get_api_key,
             delete_api_key,
             get_all_providers,
-            process_input
+            process_input,
+            import_file,
+            extract_steps,
+            check_backend
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
