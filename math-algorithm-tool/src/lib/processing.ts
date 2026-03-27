@@ -63,6 +63,14 @@ export interface ExtractionResult {
   model: string;
 }
 
+// Code generation types
+export interface CodeGenerationResult {
+  code: string;
+  syntax_valid: boolean;
+  variable_mapping: Record<string, string>;
+  errors: string[];
+}
+
 /**
  * Process algorithm input text through the Python backend.
  * 
