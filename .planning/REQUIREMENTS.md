@@ -42,9 +42,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Explanation
 
-- [ ] **EXPL-01**: System provides plain language summary of what the algorithm does
-- [ ] **EXPL-02**: System explains each major step in accessible terms
-- [ ] **EXPL-03**: System explains what the generated code does (not just what the algorithm does)
+- [x] **EXPL-01**: System provides plain language summary of what the algorithm does
+- [x] **EXPL-02**: System explains each major step in accessible terms
+- [x] **EXPL-03**: System explains what the generated code does (not just what the algorithm does)
 
 ### Settings & Configuration
 
@@ -121,9 +121,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXEC-03 | Phase 3 | Complete |
 | EXEC-04 | Phase 3 | Complete |
 | EXEC-05 | Phase 3 | Complete |
-| EXPL-01 | Phase 4 | Pending |
-| EXPL-02 | Phase 4 | Pending |
-| EXPL-03 | Phase 4 | Pending |
+| EXPL-01 | Phase 4 | Complete |
+| EXPL-02 | Phase 4 | Complete |
+| EXPL-03 | Phase 4 | Complete |
 | SET-01 | Phase 1 | Complete |
 | SET-02 | Phase 1 | Complete |
 | SET-03 | Phase 1 | Complete |
