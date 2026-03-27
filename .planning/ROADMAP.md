@@ -88,7 +88,7 @@
 
 **Plan list:**
 - [x] 03-01-PLAN.md — Code generation engine (AST-based Python code)
-- [ ] 03-02-PLAN.md — Execution sandbox with timeout/memory limits
+- [x] 03-02-PLAN.md — Execution sandbox with timeout/memory limits
 
 ---
 

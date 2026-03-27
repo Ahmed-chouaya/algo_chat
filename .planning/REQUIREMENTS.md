@@ -27,18 +27,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Code Generation
 
-- [ ] **CODE-01**: System generates syntactically correct Python code
-- [ ] **CODE-02**: Generated code is executable (no syntax errors)
-- [ ] **CODE-03**: Variables in generated code follow mathematical notation conventions (e.g., x₁, x₂)
-- [ ] **CODE-04**: Generated code includes comments explaining each section
+- [x] **CODE-01**: System generates syntactically correct Python code
+- [x] **CODE-02**: Generated code is executable (no syntax errors)
+- [x] **CODE-03**: Variables in generated code follow mathematical notation conventions (e.g., x₁, x₂)
+- [x] **CODE-04**: Generated code includes comments explaining each section
 
 ### Execution
 
-- [ ] **EXEC-01**: User can run the generated code with custom input
-- [ ] **EXEC-02**: System displays execution results clearly
-- [ ] **EXEC-03**: System displays execution errors in user-friendly format
-- [ ] **EXEC-04**: Execution has timeout protection against infinite loops
-- [ ] **EXEC-05**: Execution has memory limits to prevent runaway processes
+- [x] **EXEC-01**: User can run the generated code with custom input
+- [x] **EXEC-02**: System displays execution results clearly
+- [x] **EXEC-03**: System displays execution errors in user-friendly format
+- [x] **EXEC-04**: Execution has timeout protection against infinite loops
+- [x] **EXEC-05**: Execution has memory limits to prevent runaway processes
 
 ### Explanation
 
@@ -112,15 +112,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STEP-04 | Phase 2 | Complete |
 | STEP-05 | Phase 2 | Complete |
 | STEP-06 | Phase 2 | Complete |
-| CODE-01 | Phase 3 | Pending |
-| CODE-02 | Phase 3 | Pending |
-| CODE-03 | Phase 3 | Pending |
-| CODE-04 | Phase 3 | Pending |
-| EXEC-01 | Phase 3 | Pending |
-| EXEC-02 | Phase 3 | Pending |
-| EXEC-03 | Phase 3 | Pending |
-| EXEC-04 | Phase 3 | Pending |
-| EXEC-05 | Phase 3 | Pending |
+| CODE-01 | Phase 3 | Complete |
+| CODE-02 | Phase 3 | Complete |
+| CODE-03 | Phase 3 | Complete |
+| CODE-04 | Phase 3 | Complete |
+| EXEC-01 | Phase 3 | Complete |
+| EXEC-02 | Phase 3 | Complete |
+| EXEC-03 | Phase 3 | Complete |
+| EXEC-04 | Phase 3 | Complete |
+| EXEC-05 | Phase 3 | Complete |
 | EXPL-01 | Phase 4 | Pending |
 | EXPL-02 | Phase 4 | Pending |
 | EXPL-03 | Phase 4 | Pending |
