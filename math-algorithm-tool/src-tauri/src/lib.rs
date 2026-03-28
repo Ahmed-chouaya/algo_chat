@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::process::Command;
 
 mod commands;
+mod utils;
 use commands::processing::{import_file, extract_steps, check_backend, generate_explanation, chat_about_explanation};
+
+use utils::get_python_command;
 
 const SERVICE_NAME: &str = "math-algorithm-tool";
 
@@ -76,8 +79,8 @@ fn process_input(text: String) -> Result<ProcessedInput, String> {
         .cloned()
         .ok_or_else(|| "Could not find text_processor.py".to_string())?;
     
-    // Run Python to process the input
-    let output = Command::new("python3")
+  // Run Python to process the input
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -184,8 +187,8 @@ fn generate_python_code(steps: Vec<AlgorithmStepRust>) -> Result<CodeGenerationR
     let steps_json = serde_json::to_string(&steps)
         .map_err(|e| format!("Failed to serialize steps: {}", e))?;
     
-    // Run Python to generate code
-    let output = Command::new("python3")
+  // Run Python to generate code
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -261,8 +264,8 @@ fn execute_python(code: String, user_input: Option<String>) -> Result<ExecutionR
         String::new()
     };
     
-    // Run Python to execute the code
-    let output = Command::new("python3")
+  // Run Python to execute the code
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"

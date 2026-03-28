@@ -52,12 +52,10 @@ export async function invoke<T>(command: string, args?: any): Promise<T> {
       } as T;
 
     case 'process_input':
-      return {
-        original_text: args?.text || '',
-        cleaned_text: args?.text || '',
-        latex_expressions: [],
-        sections: []
-      } as T;
+      throw new Error(
+        'Algorithm processing requires Tauri backend and Python processing. ' +
+        'Please run "npm run dev" to start the full Tauri application.'
+      );
 
     case 'extract_steps':
       throw new Error(

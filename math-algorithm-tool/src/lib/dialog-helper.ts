@@ -21,7 +21,7 @@ export type OpenDialogOptions = {
  *
  * When running in Tauri, uses the real dialog from @tauri-apps/plugin-dialog.
  * When running in browser-only mode, throws a helpful error guiding developers
-to use "npm run dev" instead of "npm run:dev:vite".
+to use "npm run dev" instead of "npm run dev:vite".
  *
  * @param options - Dialog options
  * @returns Promise with selected file path(s)

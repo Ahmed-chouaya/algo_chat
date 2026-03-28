@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::process::Command;
 use tauri::command;
 
+use crate::utils::get_python_command;
+
 const SERVICE_NAME: &str = "math-algorithm-tool";
 
 /// Supported file formats for import
@@ -88,8 +90,8 @@ pub struct ExtractionResult {
 /// Import a file (PDF, TXT, or MD)
 #[command]
 pub fn import_file(path: String) -> Result<ImportResult, String> {
-    // Run Python to import the file
-    let output = Command::new("python3")
+  // Run Python to import the file
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -127,8 +129,8 @@ print(json.dumps({{
 /// Extract algorithm steps from text using LLM
 #[command]
 pub fn extract_steps(text: String, provider: String) -> Result<ExtractionResult, String> {
-    // First process the text to extract LaTeX
-    let process_output = Command::new("python3")
+  // First process the text to extract LaTeX
+  let process_output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -169,8 +171,8 @@ print(json.dumps({{
     let api_key = entry.get_password()
         .map_err(|e| format!("API key not configured for {}. Please add it in Settings.", provider))?;
 
-    // Now call the LLM to extract steps using the Python step_extractor
-    let extract_output = Command::new("python3")
+  // Now call the LLM to extract steps using the Python step_extractor
+  let extract_output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -234,8 +236,8 @@ print(json.dumps({{
 /// Check if the processing backend is available
 #[command]
 pub fn check_backend() -> Result<bool, String> {
-    // Simple check - try to run a Python import
-    let output = Command::new("python3")
+  // Simple check - try to run a Python import
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg("import sys; sys.path.insert(0, 'math-algorithm-tool'); from src.processing import file_processor; print('ok')")
         .output()
@@ -278,12 +280,12 @@ pub fn generate_explanation(
         .map_err(|e| format!("API key not configured for {}. Please add it in Settings.", provider))?;
 
     // Call Python to generate explanation
-    let code_arg = match &code {
-        Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
-        None => "None".to_string(),
-    };
+  let code_arg = match &code {
+    Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
+    None => "None".to_string(),
+  };
 
-    let output = Command::new("python3")
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
@@ -380,12 +382,12 @@ pub fn chat_about_explanation(
     };
 
     // Call Python to handle chat
-    let code_arg = match &generated_code {
-        Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
-        None => "None".to_string(),
-    };
+  let code_arg = match &generated_code {
+    Some(c) => format!("Some(\"{}\")", c.replace("\"", "\\\"").replace("'", "\\'")),
+    None => "None".to_string(),
+  };
 
-    let output = Command::new("python3")
+  let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
