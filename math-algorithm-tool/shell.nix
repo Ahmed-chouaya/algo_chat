@@ -11,6 +11,8 @@ pkgs.mkShell {
     python313Packages.pytest
     python313Packages.sympy
     python313Packages.antlr4-python3-runtime
+    python313Packages.pydantic
+    python313Packages.astor
 
     # Rust toolchain components
     rustc
@@ -39,7 +41,13 @@ pkgs.mkShell {
     dbus
     gcc
     gnumake
+
   ];
+
+  # Required for sandbox issues on NixOS
+  LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
+    pkgs.gtk3
+  ]}:$LD_LIBRARY_PATH";
 
   # Required environment variables for GTK/webkit
   GDK_SCALE = "1";
