@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { processAlgorithmInput } from '$lib/processing';
+  import { processAlgorithmInput, importFile } from '$lib/processing';
   import { processedInput, isProcessing, processingError } from '$lib/stores/processing';
+  import { open } from '@tauri-apps/plugin-dialog';
   
   let algorithmInput = $state('');
   
@@ -22,6 +23,60 @@
       $isProcessing = false;
     }
   }
+  
+  async function handleImportPdf() {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'PDF', extensions: ['pdf'] }]
+      });
+      
+      if (selected) {
+        $isProcessing = true;
+        $processingError = null;
+        
+        const result = await importFile(selected as string);
+        
+        if (result.success) {
+          algorithmInput = result.content;
+        } else {
+          $processingError = result.error || 'Failed to import PDF';
+        }
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      $processingError = error instanceof Error ? error.message : 'Failed to import PDF';
+    } finally {
+      $isProcessing = false;
+    }
+  }
+  
+  async function handleImportText() {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'Text', extensions: ['txt', 'md'] }]
+      });
+      
+      if (selected) {
+        $isProcessing = true;
+        $processingError = null;
+        
+        const result = await importFile(selected as string);
+        
+        if (result.success) {
+          algorithmInput = result.content;
+        } else {
+          $processingError = result.error || 'Failed to import file';
+        }
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      $processingError = error instanceof Error ? error.message : 'Failed to import file';
+    } finally {
+      $isProcessing = false;
+    }
+  }
 </script>
 
 <aside class="input-panel">
@@ -34,8 +89,8 @@
   </div>
   
   <div class="import-buttons">
-    <button class="btn btn-outline">Import PDF</button>
-    <button class="btn btn-outline">Import Text</button>
+    <button class="btn btn-outline" onclick={handleImportPdf}>Import PDF</button>
+    <button class="btn btn-outline" onclick={handleImportText}>Import Text</button>
   </div>
   
   {#if $processingError}
