@@ -90,13 +90,36 @@ pub struct ExtractionResult {
 /// Import a file (PDF, TXT, or MD)
 #[command]
 pub fn import_file(path: String) -> Result<ImportResult, String> {
-  // Run Python to import the file
-  let output = Command::new(get_python_command())
+    // Determine the working directory (same pattern as other commands)
+    let script_dir = std::env::current_exe()
+        .map(|p| p.parent().unwrap_or(std::path::Path::new(".")).to_path_buf())
+        .unwrap_or_else(|_| std::path::PathBuf::from("."));
+
+    let possible_cwds = vec![
+        std::path::PathBuf::from("math-algorithm-tool"),
+        std::path::PathBuf::from("."),
+        script_dir.clone(),
+    ];
+
+    let cwd = possible_cwds
+        .iter()
+        .find(|p| p.join("src/processing/file_processor.py").exists())
+        .cloned()
+        .unwrap_or_else(|| std::path::PathBuf::from("."));
+
+    // Normalize path for cross-platform compatibility:
+    // - Replace backslashes with forward slashes (Windows paths break Python string literals)
+    // - Escape single quotes for safe Python string interpolation
+    let safe_path = path.replace('\\', "/").replace("'", "\\'");
+
+    // Run Python to import the file
+    let output = Command::new(get_python_command())
         .arg("-c")
         .arg(format!(
             r#"
 import sys
-sys.path.insert(0, 'math-algorithm-tool')
+import os
+sys.path.insert(0, '.')
 import json
 from src.processing.file_processor import import_file
 
@@ -109,8 +132,9 @@ print(json.dumps({{
     'error': result.error
 }}))
 "#,
-            path.replace("'", "'\\''")
+            safe_path
         ))
+        .current_dir(&cwd)
         .output()
         .map_err(|e| format!("Failed to run Python: {}", e))?;
 
