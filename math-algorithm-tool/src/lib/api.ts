@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '$lib/tauri-helper';
 import type { AlgorithmStep } from '$lib/processing';
 import type { ChatMessage } from './stores/algorithm';
 

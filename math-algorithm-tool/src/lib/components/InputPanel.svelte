@@ -1,7 +1,7 @@
 <script lang="ts">
   import { processAlgorithmInput, importFile } from '$lib/processing';
   import { processedInput, isProcessing, processingError } from '$lib/stores/processing';
-  import { open } from '@tauri-apps/plugin-dialog';
+  import { open } from '$lib/dialog-helper';
   
   let algorithmInput = $state('');
   

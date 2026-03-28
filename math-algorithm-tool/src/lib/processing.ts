@@ -4,7 +4,7 @@
  * Provides the interface to the Python backend for processing
  * algorithm descriptions, file imports, and step extraction.
  */
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '$lib/tauri-helper';
 
 export interface LaTeXExpression {
   latex: string;
