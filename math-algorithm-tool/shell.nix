@@ -42,6 +42,10 @@ pkgs.mkShell {
     gcc
     gnumake
 
+    # Required for GTK/webkitgtk schemas on NixOS
+    # Fixes "Bus error (core dumped)" by providing missing schemas
+    gsettings-desktop-schemas
+    hicolor-icon-theme
   ];
 
   # Required for sandbox issues on NixOS
@@ -52,4 +56,11 @@ pkgs.mkShell {
   # Required environment variables for GTK/webkit
   GDK_SCALE = "1";
   GDK_DPI_SCALE = "1";
+
+  # NixOS fix: Set XDG_DATA_DIRS so WebKitGTK can find schemas
+  # Prevents "Bus error (core dumped)" on NixOS
+  shellHook = ''
+    export XDG_DATA_DIRS="${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}:${pkgs.hicolor-icon-theme}/share/icons''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+    echo "[NixOS Tauri Fix] XDG_DATA_DIRS configured for WebKitGTK"
+  '';
 }
