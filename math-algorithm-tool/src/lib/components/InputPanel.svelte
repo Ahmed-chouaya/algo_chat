@@ -24,6 +24,13 @@
     }
   }
   
+  function extractErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+    if (error && typeof error === 'object' && 'message' in error) return String((error as any).message);
+    return fallback;
+  }
+
   async function handleImportPdf() {
     try {
       const selected = await open({
@@ -31,11 +38,17 @@
         filters: [{ name: 'PDF', extensions: ['pdf'] }]
       });
       
+      console.log('[PDF Import] Selected path:', selected);
+      
       if (selected) {
         $isProcessing = true;
         $processingError = null;
         
-        const result = await importFile(selected as string);
+        const filePath = typeof selected === 'string' ? selected : (selected as string[])[0];
+        console.log('[PDF Import] Importing file:', filePath);
+        
+        const result = await importFile(filePath);
+        console.log('[PDF Import] Result:', result);
         
         if (result.success) {
           algorithmInput = result.content;
@@ -44,8 +57,8 @@
         }
       }
     } catch (error) {
-      console.error('Import error:', error);
-      $processingError = error instanceof Error ? error.message : 'Failed to import PDF';
+      console.error('[PDF Import] Error:', error, typeof error);
+      $processingError = extractErrorMessage(error, 'Failed to import PDF');
     } finally {
       $isProcessing = false;
     }
@@ -62,7 +75,8 @@
         $isProcessing = true;
         $processingError = null;
         
-        const result = await importFile(selected as string);
+        const filePath = typeof selected === 'string' ? selected : (selected as string[])[0];
+        const result = await importFile(filePath);
         
         if (result.success) {
           algorithmInput = result.content;
@@ -71,8 +85,8 @@
         }
       }
     } catch (error) {
-      console.error('Import error:', error);
-      $processingError = error instanceof Error ? error.message : 'Failed to import file';
+      console.error('[Text Import] Error:', error, typeof error);
+      $processingError = extractErrorMessage(error, 'Failed to import file');
     } finally {
       $isProcessing = false;
     }

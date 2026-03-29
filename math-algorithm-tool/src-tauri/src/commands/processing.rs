@@ -90,6 +90,8 @@ pub struct ExtractionResult {
 /// Import a file (PDF, TXT, or MD)
 #[command]
 pub fn import_file(path: String) -> Result<ImportResult, String> {
+    eprintln!("[import_file] Called with path: {}", path);
+
     // Determine the working directory (same pattern as other commands)
     let script_dir = std::env::current_exe()
         .map(|p| p.parent().unwrap_or(std::path::Path::new(".")).to_path_buf())
@@ -107,10 +109,15 @@ pub fn import_file(path: String) -> Result<ImportResult, String> {
         .cloned()
         .unwrap_or_else(|| std::path::PathBuf::from("."));
 
+    eprintln!("[import_file] CWD: {:?}", cwd);
+    eprintln!("[import_file] file_processor.py exists at CWD: {}", cwd.join("src/processing/file_processor.py").exists());
+    eprintln!("[import_file] Python command: {}", get_python_command());
+
     // Normalize path for cross-platform compatibility:
     // - Replace backslashes with forward slashes (Windows paths break Python string literals)
     // - Escape single quotes for safe Python string interpolation
     let safe_path = path.replace('\\', "/").replace("'", "\\'");
+    eprintln!("[import_file] Safe path: {}", safe_path);
 
     // Run Python to import the file
     let output = Command::new(get_python_command())
@@ -137,6 +144,10 @@ print(json.dumps({{
         .current_dir(&cwd)
         .output()
         .map_err(|e| format!("Failed to run Python: {}", e))?;
+
+    eprintln!("[import_file] Python exit code: {:?}", output.status);
+    eprintln!("[import_file] Python stderr: {}", String::from_utf8_lossy(&output.stderr));
+    eprintln!("[import_file] Python stdout: {}", String::from_utf8_lossy(&output.stdout));
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
